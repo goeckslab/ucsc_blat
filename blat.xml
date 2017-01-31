@@ -1,0 +1,147 @@
+<tool id="ucsc_blat" name="UCSC BLAT Alignment Tool" version="1.0">
+    <description>Rapidly align sequences to the genome</description>
+    <requirements>
+      <requirement type="package" version="1.0">ucsc_tools_340_for_BLAT</requirement>
+    </requirements>
+    <command detect_errors="exit_code"><![CDATA[
+    blat 
+        #if $noHead
+          -noHead
+        #end if
+        -q=$query_type
+        -t=$database_type
+        -mask=$mask
+        '${database}'
+        '${query}'
+        '${output}'
+
+]]></command>
+      <inputs>
+            <param type="data" name="database" format="fasta" />
+            <param type="data" name="query" format="fasta" />
+            <param type="select" name="database_type" format="text" multiple="false" label="database type" help="Choose your database type, the default is dna">
+                  <option value="dna">DNA sequence</option>
+                  <option value="prot">protein sequence</option>
+                  <option value="dnax">DNA sequence translated in six frames to protein</option>
+            </param>
+            <param type="select" name="query_type" format="text" multiple="false" label="query type" help="Choose your query type, the default is dna">
+                  <option value="dna">DNA sequence</option>
+                  <option value="rna">RNA sequence</option>
+                  <option value="prot">protein sequence</option>
+                  <option value="dnax">DNA sequence translated in six frames to protein</option>
+                  <option value="rnax">DNA sequence translated in three frames to protein</option>
+            </param>
+            <param name="noHead" type="boolean" value="false" label="Suppresses .psl header (so it's just a tab-separated file)." />
+            <param name="mask" type="select" label="Mask out repeats" help="Alignments won't be started in masked region
+                  but may extend through it in nucleotide searches.  Masked areas
+                  are ignored entirely in protein or translated searches.">
+                  <option value="lower">lower - mask out lower-cased sequence</option>
+                  <option value="upper">upper - mask out upper-cased sequence</option>
+                  <option value="out">out - mask according to database.out RepeatMasker .out file</option>
+                  <option value="file.out">file.out - mask database according to RepeatMasker file.out</option>
+            </param>
+            <!--<conditional name="database" format="fasta">
+                  <param type="select" name="database_type" format="text" multiple="false" label="database type" help="Choose your database type, the default is dna">
+                        <option value="dna">DNA sequence</option>
+                        <option value="prot">protein sequence</option>
+                        <option value="dnax">DNA sequence translated in six frames to protein</option>
+                  </param>
+        <when value="dna">
+             <param type="integer" name="tileSize" value="11" min="1" max="12" label="tileSize" help="Sets the size of match that triggers an alignment. Usually between 8 and 12">tileSize</param>
+             <param name="minMatch" type="integer" value="2" label="Sets the number of tile matches.  Usually set from 2 to 4.
+                  Default is 2 for nucleotide, 1 for protein.">-minMatch</param>
+            <param name="minIdentity" type="integer" value="90" label="Sets minimum sequence identity (in percent).  Default is
+                  90 for nucleotide searches, 25 for protein or translated
+                  protein searches.">-minIdentity</param>
+            
+        </when>
+        <when value="prot">  
+            <param type="integer" name="tileSize" value="5" min="1" max="12" label="tileSize" help="Sets the size of match that triggers an alignment. Usually between 8 and 12">tileSize</param>
+            <param name="minMatch" type="integer" value="1" label="Sets the number of tile matches.  Usually set from 2 to 4.
+                  Default is 2 for nucleotide, 1 for protein.">-minMatch</param>
+            <param name="minIdentity" type="integer" value="25" label="Sets minimum sequence identity (in percent).  Default is
+                  90 for nucleotide searches, 25 for protein or translated
+                  protein searches.">-minIdentity</param>
+        </when> 
+    </conditional>
+    <param type="select" name="query_type" format="text" multiple="false" label="query type" help="Choose your query type, the default is dna">
+        <option value="dna">DNA sequence</option>
+        <option value="rna">RNA sequence</option>
+        <option value="prot">protein sequence</option>
+        <option value="dnax">DNA sequence translated in six frames to protein</option>
+        <option value="rnax">DNA sequence translated in three frames to protein</option>
+    </param>
+    <conditional name="settings">
+        <param name="advanced" type="select" multiple="false" label="Specify advanced parameters">
+            <option value="simple" selected="true">No, use program defaults. </option>
+            <option value="advanced">Yes, see full parameter list.</option>
+        </param>
+        <when value="advanced">
+            <param name="mask" type="select" label="Mask out repeats" help="Alignments won't be started in masked region
+                  but may extend through it in nucleotide searches.  Masked areas
+                  are ignored entirely in protein or translated searches.">
+                  <option value="lower">lower - mask out lower-cased sequence</option>
+                  <option value="upper">upper - mask out upper-cased sequence</option>
+                  <option value="out">out - mask according to database.out RepeatMasker .out file</option>
+                  <option value="file.out">file.out - mask database according to RepeatMasker file.out</option>
+            </param>
+            <param name="qmask" type="select" label="Mask out repeats in query sequence" help="Similar to -mask above, but
+                  for query rather than target sequence.">
+                  <option value="lower">lower - mask out lower-cased sequence</option>
+                  <option value="upper">upper - mask out upper-cased sequence</option>
+                  <option value="out">out - mask according to database.out RepeatMasker .out file</option>
+                  <option value="file.out">file.out - mask database according to RepeatMasker file.out</option>
+            </param>
+            <param name="oneOff" type="integer" value="0" label="If set to 1, this allows one mismatch in tile and still triggers an alignment. Default is 0.">-oneOff</param>
+            <param name="minScore" type="integer" value="30" label="Sets minimum score.  This is the matches minus the
+                  mismatches minus some sort of gap penalty.  Default is 30.">-minScore</param>
+            <param name="maxGap" type="integer" value="2" label="Sets the size of maximum gap between tiles in a clump.  Usually
+                  set from 0 to 3.  Default is 2. Only relevent for minMatch > 1.">-maxGap</param>
+            <param name="minRepDivergence" type="integer" value="15" min="0" max="100" label="Minimum percent divergence of repeats to allow
+                  them to be unmasked.  Default is 15.  Only relevant for
+                  masking using RepeatMasker .out files.">-minRepDivergence</param>
+            <param name="noHead" type="boolean" value="false" label="Suppresses .psl header (so it's just a tab-separated file)." />
+            <param name="dots" type="integer" value="0" label="Output dot every N sequences to show program's progress." />
+            <param name="trimT" type="boolean" value="false" label="Trim leading poly-T." />
+            <param name="trimHardA" type="boolean" value="false" label="Remove poly-A tail from qSize as well as alignments in
+                  psl output." />
+            <param name="fastMap" type="boolean" value="false" label="Run for fast DNA/DNA remapping - not allowing introns,
+                  requiring high %ID. Query sizes must not exceed 5000." />
+            <param name="fine" type="boolean" value="false" label="For high-quality mRNAs, look harder for small initial and
+                  terminal exons.  Not recommended for ESTs." />
+            <param name="out" type="select" label="Output file format">
+                <option value="psl" selected="true">psl - Default.  Tab-separated format, no sequence</option>
+                <option value="pslx">pslx - Tab-separated format with sequence</option>
+                <option value="axt">axt - blastz-associated axt format</option>
+                <option value="maf">maf - multiz-associated maf format</option>
+                <option value="sim4">sim4 - similar to sim4 format</option>
+                <option value="wublast">wublast - similar to wublast format</option>
+                <option value="blast">blast - similar to NCBI blast format</option>
+                <option value="blast8">blast8- NCBI blast tabular format</option>
+                <option value="blast9">blast9 - NCBI blast tabular format with comments</option>
+           </param>
+           <param name="maxIntro" type="integer" value="750000" label="Sets maximum intron size. Default is 750000." />
+           <param name="extendThroughN" type="boolean" value="false" label="Allows extension of alignment through large blocks of Ns." />
+      </when>
+    </conditional>-->
+      </inputs>
+      <outputs>
+            <data format="psl" name="output"></data>
+      </outputs>
+  <tests>
+      <test>
+            <param name="database" value="amaVit1.fa" />
+            <param name="query" value="Gallus_gallus_RefSeq.fa" />
+            <param name="database_type" value="dnax" />    
+            <param name="query_type" value="rnax" />     
+            <param name="noHead" value="true" />
+            <param name="mask" value="lower" />
+            <output name="output" value="amaVit1_Gallus_gallus.psl" />
+      </test>
+  </tests>           
+</tool>
+             
+            
+
+               
+    
