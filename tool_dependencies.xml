@@ -1,8 +1,11 @@
 <?xml version="1.0"?>
 <tool_dependency>
-    <!-- UCSC tools:
+    <!-- required tools:
         - blat
-        - 
+        - sort
+        - pslReps
+        - faPolyASizes
+        - pslCDnaFilter
     -->
     <package name="ucsc_tools_340_for_BLAT" version="1.0">
         <install version="1.0">
