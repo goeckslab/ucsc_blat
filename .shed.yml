@@ -5,4 +5,6 @@ homepage_url: http://genome.ucsc.edu/goldenPath/help/blatSpec.html
 type: unrestricted
 categories: 
 - Sequence Analysis
-
+exclude:
+  - tool_test_output.html
+  - tool_test_output.json

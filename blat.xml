@@ -16,9 +16,9 @@
         '${query}'
         output
     && sort -k 10,10 -k 12,12n output > '${output_sorted}'
-    && pslReps -minAli=0.25 '${output_sorted}' output.reps.psl output.reps.psr
-    && faPolyASizes '${query}' query.polyA
     #if $filter_param.filter =="yes"
+      && pslReps -minAli=0.25 '${output_sorted}' output.reps.psl output.reps.psr
+      && faPolyASizes '${query}' query.polyA
       && pslCDnaFilter
             #if $filter_param.assembly_type == "native"
                   -localNearBest=0.001
@@ -84,6 +84,7 @@
                         <option value="no" selected="true">No</option>
                         <option value="yes">Yes</option>
                   </param>
+                  <when value="no"/>
                   <when value="yes">
                         <param name="assembly_type" type="select" label="Choose your type of cDNA sequence">
                               <option value="native">Same species</option>
@@ -98,13 +99,15 @@
             </conditional>
       </inputs>
       <outputs>
-            <data format="psl" name="output_sorted"></data>
-            <data format="psl" name="output_filtered"></data>
+            <data format="psl" name="output_sorted" label="${tool.name} on ${on_string}"></data>
+            <data format="psl" name="output_filtered" label="${tool.name} on ${on_string}:filtered BLAT results">
+                  <filter>filter_param['filter'] == "yes"</filter> 
+            </data>
       </outputs>
   <tests>
       <test>
-            <param name="database" value="amaVit1.fa" />
-            <param name="query" value="Gallus_gallus_RefSeq.fa" />
+            <param name="database" value="amaVit1_Gallus/amaVit1.fa" />
+            <param name="query" value="amaVit1_Gallus/Gallus_gallus_RefSeq.fa" />
             <param name="database_type" value="dnax" />    
             <param name="query_type" value="rnax" />     
             <param name="noHead" value="true" />
@@ -112,9 +115,23 @@
             <param name="filter" value="yes" />
             <param name="assembly_type" value="xeno" />
             <param name="assembly_category" value="well-ordered" />
-            <output name="output_sorted" value="amaVit1_Gallus_gallus.psl" />
-            <output name="output_filtered" value="amaVit1_Gallus_gallus_filtered.psl" />
+            <output name="output_sorted" value="amaVit1_Gallus/amaVit1_Gallus_gallus.psl" />
+            <output name="output_filtered" value="amaVit1_Gallus/amaVit1_Gallus_gallus_filtered.psl" />
       </test>
+      <test>
+            <param name="database" value="dbia3/dbia3.fa" />
+            <param name="query" value="dbia3/dmel-all-translation-r6.11.fasta" />
+            <param name="database_type" value="dnax" />    
+            <param name="query_type" value="prot" />     
+            <param name="noHead" value="true" />
+            <param name="mask" value="lower" />
+            <param name="filter" value="yes" />
+            <param name="assembly_type" value="xeno" />
+            <param name="assembly_category" value="well-ordered" />
+            <output name="output_sorted" value="dbia3/dbia3.sorted.psl" />
+            <output name="output_filtered" value="dbia3/dbia3_dmel_filtered.psl" />
+      </test>
+
   </tests> 
   <help>
         <![CDATA[
@@ -123,31 +140,43 @@ BLAT
 BLAT is a bioinformatics software a tool which performs rapid mRNA/DNA and cross-species protein alignments. 
 
 blat (version: v340)- Standalone blat sequence search command line tool. 
----------------------------------------------------------
+-------------------------------------------------------------------------
+
 usage:
 ++++++
-   blat database query [-ooc=11.ooc] output.psl
+
+  $ blat database query [-ooc=11.ooc] output.psl
+
 where:
    database and query are each either a .fa, .nib or .2bit file,
-      or a list of these files with one file name per line.
+   or a list of these files with one file name per line.
    -ooc=11.ooc tells the program to load over-occurring 11-mers from
-      an external file.  This will increase the speed
-      by a factor of 40 in many cases, but is not required.
-   output.psl is the name of the output file.   
+   an external file.  This will increase the speed
+   by a factor of 40 in many cases, but is not required.
+   output.psl is the name of the output file.  
+
 documentation:
 ++++++++++++++
-See Blat documentation (http://genome.ucsc.edu/goldenPath/help/blatSpec.html)  
+
+See Blat documentation (http://genome.ucsc.edu/goldenPath/help/blatSpec.html) 
+
 Source code:
 ++++++++++++
+
 http://hgdownload.cse.ucsc.edu/admin/exe/
+
 pslCDnaFilter (version: v340)
----------------------------
+-----------------------------
 Filter cDNA alignments in psl format. Filtering criteria are comparative, selecting near best in genome alignments for each given cDNA and non-comparative, based only on the quality of an individual alignment.
+
 usage:
 ++++++
-      pslCDnaFilter [options] inPsl outPsl
+
+  $ pslCDnaFilter [options] inPsl outPsl
+
 Source code:
 ++++++++++++
+
 http://hgdownload.cse.ucsc.edu/admin/exe/
 
 Licence
