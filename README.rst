@@ -6,7 +6,7 @@ Features
 --------
 1. Perform rapid mRNA/DNA and cross-species protein alignments using blat 
 2. Sort the output file
-3. Filter cDNA alignments in psl format using pslCDnaFilter
+3. The output file can be filtered using UCSC pslCDnaFilter
 
 Licence
 -------

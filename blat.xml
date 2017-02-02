@@ -16,44 +16,6 @@
         '${query}'
         output
     && sort -k 10,10 -k 12,12n output > '${output_sorted}'
-    #if $filter_param.filter =="yes"
-      && pslReps -minAli=0.25 '${output_sorted}' output.reps.psl output.reps.psr
-      && faPolyASizes '${query}' query.polyA
-      && pslCDnaFilter
-            #if $filter_param.assembly_type == "native"
-                  -localNearBest=0.001
-                  #if $filter_param.assembly_category == "finished"
-                        -minId=0.95
-                        -minCover=0.25
-                  #else if $filter_param.assembly_category == "well-ordered"
-                        -minId=0.95
-                        -minCover=0.15
-            #else
-                  -minId=0.94
-                  -minAlnSize=80
-            #end if
-            #else
-                  -localNearBest=0.010
-                  #if $filter_param.assembly_category == "finished"
-                        -minId=0.35
-                        -minCover=0.25
-                  #else if $filter_param.assembly_category == "well-ordered"
-                        -minId=0.35
-                        -minCover=0.15
-                  #else
-                        -minId=0.33
-                        -minAlnSize=80
-                  #end if
-            #end if
-            -minQSize=20 
-            -ignoreIntrons 
-            -repsAsMatch 
-            -ignoreNs 
-            -bestOverlap 
-            -polyASizes=query.polyA 
-            output.reps.psl 
-            '${output_filtered}'
-    #end if
 ]]></command>
       <inputs>
             <param type="data" name="database" format="fasta" />
@@ -79,30 +41,9 @@
                   <option value="out">out - mask according to database.out RepeatMasker .out file</option>
                   <option value="file.out">file.out - mask database according to RepeatMasker file.out</option>
             </param>
-            <conditional name="filter_param">
-                  <param name="filter" type="select" label="Filter BLAT results with pslCDnaFilter">
-                        <option value="no" selected="true">No</option>
-                        <option value="yes">Yes</option>
-                  </param>
-                  <when value="no"/>
-                  <when value="yes">
-                        <param name="assembly_type" type="select" label="Choose your type of cDNA sequence">
-                              <option value="native">Same species</option>
-                              <option value="xeno">Across species</option>
-                        </param>
-                        <param name="assembly_category" type="select" label="Choose your genome assembly category">
-                              <option value="finished">finished assemblies (high quality)</option>
-                              <option value="well-ordered">well-ordered assemblies (well ordered, whole genome shotgun)</option>
-                              <option value="low-coverage">low-coverage assemblies (low coverage (&lt; 4x"), lots of contigs, N50 scaffold size &lt; 1mb) </option>
-                        </param>
-                  </when>
-            </conditional>
       </inputs>
       <outputs>
             <data format="psl" name="output_sorted" label="${tool.name} on ${on_string}"></data>
-            <data format="psl" name="output_filtered" label="${tool.name} on ${on_string}:filtered BLAT results">
-                  <filter>filter_param['filter'] == "yes"</filter> 
-            </data>
       </outputs>
   <tests>
       <test>
@@ -112,24 +53,16 @@
             <param name="query_type" value="rnax" />     
             <param name="noHead" value="true" />
             <param name="mask" value="lower" />
-            <param name="filter" value="yes" />
-            <param name="assembly_type" value="xeno" />
-            <param name="assembly_category" value="well-ordered" />
             <output name="output_sorted" value="amaVit1_Gallus/amaVit1_Gallus_gallus.psl" />
-            <output name="output_filtered" value="amaVit1_Gallus/amaVit1_Gallus_gallus_filtered.psl" />
       </test>
       <test>
             <param name="database" value="dbia3/dbia3.fa" />
-            <param name="query" value="dbia3/dmel-all-translation-r6.11.fasta" />
+            <param name="query" value="dbia3/dmel-all-transcript-r6.13.fasta" />
             <param name="database_type" value="dnax" />    
-            <param name="query_type" value="prot" />     
+            <param name="query_type" value="rnax" />     
             <param name="noHead" value="true" />
             <param name="mask" value="lower" />
-            <param name="filter" value="yes" />
-            <param name="assembly_type" value="xeno" />
-            <param name="assembly_category" value="well-ordered" />
             <output name="output_sorted" value="dbia3/dbia3.sorted.psl" />
-            <output name="output_filtered" value="dbia3/dbia3_dmel_filtered.psl" />
       </test>
 
   </tests> 
@@ -165,25 +98,7 @@ Source code:
 
 http://hgdownload.cse.ucsc.edu/admin/exe/
 
-pslCDnaFilter (version: v340)
------------------------------
-Filter cDNA alignments in psl format. Filtering criteria are comparative, selecting near best in genome alignments for each given cDNA and non-comparative, based only on the quality of an individual alignment.
-
-usage:
-++++++
-
-  $ pslCDnaFilter [options] inPsl outPsl
-
-Source code:
-++++++++++++
-
-http://hgdownload.cse.ucsc.edu/admin/exe/
-
-Licence
-=======
-Please note that commercial download and installation of the Blat and In-Silico PCR software may be licensed through Kent Informatics (http://www.kentinformatics.com).
-]]>
-</help>  
+]]></help>  
 <citations>
       <citation type="bibtex">@article{kent2002blat,
   title={BLAT—the BLAST-like alignment tool},
