@@ -6,7 +6,7 @@
     </requirements>
     <command detect_errors="exit_code"><![CDATA[
     blat 
-        #if $noHead
+        #if $noHead == "yes"
           -noHead
         #end if
         -q=$query_type
@@ -20,23 +20,26 @@
       <inputs>
             <param type="data" name="database" format="fasta" />
             <param type="data" name="query" format="fasta" />
-            <param type="select" name="database_type" format="text" multiple="false" label="database type" help="Choose your database type, the default is dna">
-                  <option value="dna">DNA sequence</option>
-                  <option value="prot">protein sequence</option>
-                  <option value="dnax">DNA sequence translated in six frames to protein</option>
+            <param type="select" name="database_type" format="text" multiple="false" label="database type" help="Choose your database type, the default is dnax" argument="-t">
+                  <option value="dna">dna - DNA sequence</option>
+                  <option value="prot">prot - protein sequence</option>
+                  <option value="dnax" selected="true">dnax - DNA sequence translated in six frames to protein</option>
             </param>
-            <param type="select" name="query_type" format="text" multiple="false" label="query type" help="Choose your query type, the default is dna">
-                  <option value="dna">DNA sequence</option>
-                  <option value="rna">RNA sequence</option>
-                  <option value="prot">protein sequence</option>
-                  <option value="dnax">DNA sequence translated in six frames to protein</option>
-                  <option value="rnax">DNA sequence translated in three frames to protein</option>
+            <param type="select" name="query_type" format="text" multiple="false" label="query type" help="Choose your query type, the default is rnax" argument="-q">
+                  <option value="dna">dna - DNA sequence </option>
+                  <option value="rna">rna - RNA sequence</option>
+                  <option value="prot">prot - protein sequence</option>
+                  <option value="dnax">dnax - DNA sequence translated in six frames to protein</option>
+                  <option value="rnax" selected="true">rnax - DNA sequence translated in three frames to protein</option>
             </param>
-            <param name="noHead" type="boolean" value="false" label="Suppresses .psl header (so it's just a tab-separated file)." />
+            <param type="select" name="noHead" format="text" label="Suppresses .psl header (so it's just a tab-separated file)." >
+                  <option value="yes" selected="true">Yes, suppresses .psl header</option>
+                  <option value="no">No, do not suppresses .psl header</option>
+            </param>
             <param name="mask" type="select" label="Mask out repeats" help="Alignments won't be started in masked region
                   but may extend through it in nucleotide searches.  Masked areas
-                  are ignored entirely in protein or translated searches.">
-                  <option value="lower">lower - mask out lower-cased sequence</option>
+                  are ignored entirely in protein or translated searches. Default is lower" argument="-mask">
+                  <option value="lower" selected="true">lower - mask out lower-cased sequence</option>
                   <option value="upper">upper - mask out upper-cased sequence</option>
                   <option value="out">out - mask according to database.out RepeatMasker .out file</option>
                   <option value="file.out">file.out - mask database according to RepeatMasker file.out</option>
