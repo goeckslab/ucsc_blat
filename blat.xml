@@ -5,20 +5,42 @@
       <requirement type="package" version="1.0">ucsc_tools_340_for_BLAT</requirement>
     </requirements>
     <command detect_errors="exit_code"><![CDATA[
-    blat 
-        #if $noHead == "yes"
-          -noHead
-        #end if
-        -q=$query_type
-        -t=$database_type
-        -mask=$mask
-        '${database}'
-        '${query}'
-        output
-    && sort -k 10,10 -k 12,12n output > '${output_sorted}'
+      #if str($reference_source.reference_source_selector) == "history":
+            #set $reference_fasta_filename = "localref.fa" 
+            ln -s '${reference_source.database}' '${reference_fasta_filename}' &&
+      #else:
+            #set $reference_fasta_filename = str($reference_source.database.fields.path)
+      #end if
+      blat 
+            #if $noHead == "yes"
+            -noHead
+            #end if
+            -q=$query_type
+            -t=$database_type
+            -mask=$mask
+            '$reference_fasta_filename'
+            '${query}'
+            output
+      && sort -k 10,10 -k 12,12n output > '${output_sorted}'
 ]]></command>
       <inputs>
-            <param type="data" name="database" format="fasta" />
+            <conditional name="reference_source">
+                  <param name="reference_source_selector" type="select" label="Choose the source for the database">
+                        <option value="cached">Locally cached</option>
+                        <option value="history">History</option>
+                  </param>
+                  <when value="cached">
+                        <param name="database" type="select" label="Select database">
+                              <options from_data_table="all_fasta">
+                                    <filter type="sort_by" column="2" />
+                              </options>
+                              <validator type="no_options" message="A built-in database is not available" />
+                        </param>
+                  </when>
+                  <when value="history">
+                        <param name="database" type="data" format="fasta" label="Using database file" />
+                  </when>
+            </conditional>
             <param type="data" name="query" format="fasta" />
             <param type="select" name="database_type" format="text" multiple="false" label="database type" help="Choose your database type, the default is dnax" argument="-t">
                   <option value="dna">dna - DNA sequence</option>
@@ -50,20 +72,32 @@
       </outputs>
   <tests>
       <test>
+            <param name="reference_source_selector" value="history" />
             <param name="database" value="amaVit1_Gallus/amaVit1.fa" />
             <param name="query" value="amaVit1_Gallus/Gallus_gallus_RefSeq.fa" />
             <param name="database_type" value="dnax" />    
             <param name="query_type" value="rnax" />     
-            <param name="noHead" value="true" />
+            <param name="noHead" value="yes" />
             <param name="mask" value="lower" />
             <output name="output_sorted" value="amaVit1_Gallus/amaVit1_Gallus_gallus.psl" />
       </test>
       <test>
+            <param name="reference_source_selector" value="history" />
             <param name="database" value="dbia3/dbia3.fa" />
             <param name="query" value="dbia3/dmel-all-transcript-r6.13.fasta" />
             <param name="database_type" value="dnax" />    
             <param name="query_type" value="rnax" />     
-            <param name="noHead" value="true" />
+            <param name="noHead" value="yes" />
+            <param name="mask" value="lower" />
+            <output name="output_sorted" value="dbia3/dbia3.sorted.psl" />
+      </test>
+      <test>
+            <param name="reference_source_selector" value="cached" />
+            <param name="database" value="dbia3" />
+            <param name="query" value="dbia3/dmel-all-transcript-r6.13.fasta" />
+            <param name="database_type" value="dnax" />    
+            <param name="query_type" value="rnax" />     
+            <param name="noHead" value="yes" />
             <param name="mask" value="lower" />
             <output name="output_sorted" value="dbia3/dbia3.sorted.psl" />
       </test>
