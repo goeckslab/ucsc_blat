@@ -17,7 +17,11 @@
             #end if
             -q=$query_type
             -t=$database_type
-            -mask=$mask
+            #if $mask_type.mask == "file.out":
+                  -mask=$mask_type.mask_file
+            #else:
+                  -mask=$mask_type.mask
+            #end if
             '$reference_fasta_filename'
             '${query}'
             output
@@ -38,10 +42,10 @@
                         </param>
                   </when>
                   <when value="history">
-                        <param name="database" type="data" format="fasta" label="Using database file" />
+                        <param name="database" type="data" format="fasta, twobit" label="Using database file, either a .fa, .nib or .2bit file" />
                   </when>
             </conditional>
-            <param type="data" name="query" format="fasta" />
+            <param type="data" name="query" format="fasta, twobit" label="Query data, either a .fa, .nib or .2bit file"/>
             <param type="select" name="database_type" format="text" multiple="false" label="database type" help="Choose your database type, the default is dnax" argument="-t">
                   <option value="dna">dna - DNA sequence</option>
                   <option value="prot">prot - protein sequence</option>
@@ -58,19 +62,28 @@
                   <option value="yes" selected="true">Yes, suppresses .psl header</option>
                   <option value="no">No, do not suppresses .psl header</option>
             </param>
-            <param name="mask" type="select" label="Mask out repeats" help="Alignments won't be started in masked region
+            <conditional name="mask_type">
+                  <param name="mask" type="select" label="Mask out repeats" help="Alignments won't be started in masked region
                   but may extend through it in nucleotide searches.  Masked areas
                   are ignored entirely in protein or translated searches. Default is lower" argument="-mask">
-                  <option value="lower" selected="true">lower - mask out lower-cased sequence</option>
-                  <option value="upper">upper - mask out upper-cased sequence</option>
-                  <option value="out">out - mask according to database.out RepeatMasker .out file</option>
-                  <option value="file.out">file.out - mask database according to RepeatMasker file.out</option>
-            </param>
+                        <option value="lower" selected="true">lower - mask out lower-cased sequence</option>
+                        <option value="upper">upper - mask out upper-cased sequence</option>
+                        <option value="out">out - mask according to database.out RepeatMasker .out file</option>
+                        <option value="file.out">file.out - mask database according to RepeatMasker file.out</option>
+                  </param>
+                  <when value="lower" />
+                  <when value="upper" />
+                  <when value="out" />
+                  <when value="file.out">
+                        <param name="mask_file" type="data" format="txt" label="RepeatMasker file.out" />
+                  </when>  
+            </conditional>
       </inputs>
       <outputs>
             <data format="psl" name="output_sorted" label="${tool.name} on ${on_string}"></data>
       </outputs>
   <tests>
+      <!-- test on query of GenBank RefSeq records for Gallus gallus and database of Amazona vittata -->
       <test>
             <param name="reference_source_selector" value="history" />
             <param name="database" value="amaVit1_Gallus/amaVit1.fa" />
@@ -81,25 +94,28 @@
             <param name="mask" value="lower" />
             <output name="output_sorted" value="amaVit1_Gallus/amaVit1_Gallus_gallus.psl" />
       </test>
+      <!-- test on query of partial mRNA of Drosophila melanogaster and the database of Drosophila biamipes dot chromosome -->
       <test>
             <param name="reference_source_selector" value="history" />
             <param name="database" value="dbia3/dbia3.fa" />
-            <param name="query" value="dbia3/dmel-all-transcript-r6.13.fasta" />
+            <param name="query" value="dbia3/dmel-transcript.fa" />
             <param name="database_type" value="dnax" />    
             <param name="query_type" value="rnax" />     
             <param name="noHead" value="yes" />
             <param name="mask" value="lower" />
             <output name="output_sorted" value="dbia3/dbia3.sorted.psl" />
       </test>
+      <!-- test on the database masked by repeat masker -->
       <test>
-            <param name="reference_source_selector" value="cached" />
-            <param name="database" value="dbia3" />
-            <param name="query" value="dbia3/dmel-all-transcript-r6.13.fasta" />
+            <param name="reference_source_selector" value="history" />
+            <param name="database" value="dbia3/dbia3_masked.2bit" />
+            <param name="query" value="dbia3/dmel-transcript.fa" />
             <param name="database_type" value="dnax" />    
             <param name="query_type" value="rnax" />     
             <param name="noHead" value="yes" />
-            <param name="mask" value="lower" />
-            <output name="output_sorted" value="dbia3/dbia3.sorted.psl" />
+            <param name="mask" value="file.out" />
+            <param name="mask_file" value="dbia3/dbia3_RM.out" />
+            <output name="output_sorted" value="dbia3/dbia3_masked.sorted.psl" />
       </test>
 
   </tests> 
@@ -137,16 +153,7 @@ http://hgdownload.cse.ucsc.edu/admin/exe/
 
 ]]></help>  
 <citations>
-      <citation type="bibtex">@article{kent2002blat,
-  title={BLAT—the BLAST-like alignment tool},
-  author={Kent, W James},
-  journal={Genome research},
-  volume={12},
-  number={4},
-  pages={656--664},
-  year={2002},
-  publisher={Cold Spring Harbor Lab}
-      }</citation>
+      <citation type="doi">10.1101/gr.229202</citation>
 </citations> 
 </tool>
              
