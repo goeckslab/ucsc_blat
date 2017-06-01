@@ -42,10 +42,10 @@
                         </param>
                   </when>
                   <when value="history">
-                        <param name="database" type="data" format="fasta, twobit" label="Using database file, either a .fa, .nib or .2bit file" />
+                        <param name="database" type="data" format="fasta,twobit" label="Using database file, either a .fa, .nib or .2bit file" />
                   </when>
             </conditional>
-            <param type="data" name="query" format="fasta, twobit" label="Query data, either a .fa, .nib or .2bit file"/>
+            <param type="data" name="query" format="fasta,twobit" label="Query data, either a .fa, .nib or .2bit file"/>
             <param type="select" name="database_type" format="text" multiple="false" label="database type" help="Choose your database type, the default is dnax" argument="-t">
                   <option value="dna">dna - DNA sequence</option>
                   <option value="prot">prot - protein sequence</option>
