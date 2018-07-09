@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<datatypes>
+  <registration>
+    <datatype extension="psl" type="galaxy.datatypes.tabular:Tabular" subclass="True" />
+  </registration>
+</datatypes>
